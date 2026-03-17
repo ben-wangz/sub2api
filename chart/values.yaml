@@ -1,0 +1,205 @@
+commonAnnotations: {}
+commonLabels: {}
+
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
+
+nameOverride: ""
+fullnameOverride: ""
+
+replicaCount: 1
+revisionHistoryLimit: 10
+updateStrategy: {}
+
+image:
+  repository: weishaw/sub2api
+  tag: latest
+  pullPolicy: IfNotPresent
+
+podAnnotations: {}
+podLabels: {}
+nodeSelector: {}
+tolerations: []
+
+affinity: {}
+podAffinityPreset: ""
+podAntiAffinityPreset: soft
+nodeAffinityPreset:
+  type: ""
+  key: ""
+  values: []
+
+podSecurityContext:
+  enabled: true
+  fsGroup: 1000
+  fsGroupChangePolicy: Always
+  supplementalGroups: []
+  sysctls: []
+
+containerSecurityContext:
+  enabled: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  runAsNonRoot: true
+  allowPrivilegeEscalation: false
+  privileged: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop:
+      - ALL
+  seccompProfile:
+    type: RuntimeDefault
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+  annotations: {}
+
+ingress:
+  enabled: true
+  ingressClassName: nginx
+  annotations: {}
+  hostname: ""
+  path: /
+  pathType: Prefix
+  tls: false
+  extraHosts: []
+  extraTls: []
+
+persistence:
+  enabled: true
+  existingClaim: ""
+  storageClass: ""
+  accessModes:
+    - ReadWriteMany
+  size: 10Gi
+  mountPath: /app/data
+  subPath: ""
+
+env:
+  autoSetup: true
+  serverHost: 0.0.0.0
+  serverPort: 8080
+  serverMode: release
+  runMode: standard
+  tz: Asia/Shanghai
+  securityUrlAllowlist:
+    enabled: false
+    allowInsecureHttp: false
+    allowPrivateHosts: false
+
+admin:
+  email: admin@sub2api.local
+  password: ""
+
+auth:
+  jwtSecret: ""
+  jwtExpireHour: 24
+  totpEncryptionKey: ""
+
+database:
+  host: ""
+  port: 5432
+  user: sub2api
+  password: ""
+  dbname: sub2api
+  sslmode: disable
+  maxOpenConns: 50
+  maxIdleConns: 10
+  connMaxLifetimeMinutes: 30
+  connMaxIdleTimeMinutes: 5
+
+cache:
+  host: ""
+  port: 6379
+  password: ""
+  db: 0
+  poolSize: 1024
+  minIdleConns: 10
+  enableTls: false
+
+secrets:
+  existingSecret: ""
+  existingConfigMap: ""
+
+  bootstrap:
+    enabled: true
+    image:
+      registry: docker.io
+      repository: bitnami/kubectl
+      tag: 1.33.4-debian-12-r0
+      pullPolicy: IfNotPresent
+
+extraEnvVars: []
+extraEnvVarsSecret: ""
+
+extraVolumeMounts: []
+extraVolumes: []
+
+resources: {}
+resourcesPreset: none
+
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 20
+  periodSeconds: 20
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
+
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
+
+startupProbe:
+  enabled: false
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 0
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 30
+  successThreshold: 1
+
+postgresql:
+  enabled: true
+  auth:
+    username: sub2api
+    password: ""
+    database: sub2api
+    existingSecret: "{{ .Release.Name }}-sub2api-secrets"
+    secretKeys:
+      adminPasswordKey: postgres-password
+      userPasswordKey: password
+  primary:
+    persistence:
+      enabled: true
+      size: 10Gi
+
+redis:
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: false
+    password: ""
+    existingSecret: "{{ .Release.Name }}-sub2api-secrets"
+    existingSecretPasswordKey: redis-password
+  master:
+    persistence:
+      enabled: true
+      size: 5Gi
+  replica:
+    replicaCount: 0

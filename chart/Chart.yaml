@@ -1,0 +1,21 @@
+apiVersion: v2
+name: sub2api
+description: Sub2API Helm chart (app + optional PostgreSQL/Redis dependencies)
+type: application
+version: 0.1.0
+appVersion: "latest"
+
+dependencies:
+  - name: common
+    repository: oci://registry-1.docker.io/bitnamicharts
+    version: 2.x.x
+    tags:
+      - bitnami-common
+  - name: postgresql
+    repository: oci://registry-1.docker.io/bitnamicharts
+    version: 17.x.x
+    condition: postgresql.enabled
+  - name: redis
+    repository: oci://registry-1.docker.io/bitnamicharts
+    version: 23.x.x
+    condition: redis.enabled
